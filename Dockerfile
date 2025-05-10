@@ -37,6 +37,8 @@ WORKDIR /var/www
 # Copy full source code first
 COPY . /var/www
 
+RUN cp /var/www/.env.example /var/www/.env
+
 # Set permissions
 RUN groupadd -g 1000 www && \
     useradd -u 1000 -ms /bin/bash -g www www && \

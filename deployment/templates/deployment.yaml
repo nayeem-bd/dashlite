@@ -9,7 +9,7 @@ data:
         index index.php index.html;
         error_log  /var/log/nginx/error.log;
         access_log /var/log/nginx/access.log;
-        root /var/www/public;
+        root /var/www/html/public;
 
         location / {
             try_files $uri $uri/ /index.php?$query_string;
@@ -19,7 +19,7 @@ data:
         location ~ \.php$ {
             try_files $uri =404;
             fastcgi_split_path_info ^(.+\.php)(/.+)$;
-            fastcgi_pass {{ .Release.Name }}:9000;
+            fastcgi_pass 127.0.0.1:9000;
             fastcgi_index index.php;
             include fastcgi_params;
             fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
@@ -61,6 +61,13 @@ spec:
       securityContext:
         {{ toYaml . | nindent 8 }}
       {{- end }}
+      initContainers:
+        - name: copy-app
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          command: ["sh", "-c", "cp -r /var/www/* /app"]
+          volumeMounts:
+            - name: app-code
+              mountPath: /app
       containers:
         - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}
