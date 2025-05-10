@@ -3,7 +3,7 @@ replicaCount: 2
 image:
   repository: nayeembd/dashlite
   pullPolicy: IfNotPresent
-  tag: "cd121db"
+  tag: "99053b9"
 
 imagePullSecrets: []
 nameOverride: ""

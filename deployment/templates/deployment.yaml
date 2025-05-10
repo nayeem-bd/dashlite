@@ -1,32 +1,3 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: dashlite-nginx-config
-data:
-  default.conf: |
-    server {
-        listen 80;
-        index index.php index.html;
-        error_log  /var/log/nginx/error.log;
-        access_log /var/log/nginx/access.log;
-        root /var/www/html/public;
-
-        location / {
-            try_files $uri $uri/ /index.php?$query_string;
-            gzip_static on;
-        }
-
-        location ~ \.php$ {
-            try_files $uri =404;
-            fastcgi_split_path_info ^(.+\.php)(/.+)$;
-            fastcgi_pass 127.0.0.1:9000;
-            fastcgi_index index.php;
-            include fastcgi_params;
-            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-            fastcgi_param PATH_INFO $fastcgi_path_info;
-        }
-    }
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -64,7 +35,7 @@ spec:
       initContainers:
         - name: copy-app
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          command: ["sh", "-c", "cp -r /var/www/* /app"]
+          command: [ "sh", "-c", "cp -r /var/www/. /app/" ]
           volumeMounts:
             - name: app-code
               mountPath: /app
@@ -99,6 +70,11 @@ spec:
               value: "redis"
             - name: SESSION_DRIVER
               value: "redis"
+            - name: APP_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}-app-config
+                  key: APP_KEY
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{ toYaml . | nindent 12 }}
@@ -113,14 +89,14 @@ spec:
           {{- end }}
           volumeMounts:
             - name: app-code
-              mountPath: /var/www/html
+              mountPath: /var/www
         - name: nginx
           image: nginx:alpine
           ports:
             - containerPort: 80
           volumeMounts:
             - name: app-code
-              mountPath: /var/www/html
+              mountPath: /var/www
             - name: nginx-config
               mountPath: /etc/nginx/conf.d
 
