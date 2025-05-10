@@ -1,0 +1,92 @@
+replicaCount: 2
+
+image:
+  repository: nayeembd/dashlite
+  pullPolicy: IfNotPresent
+  tag: "a2756d8"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podLabels: {}
+
+podSecurityContext: {}
+
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: ""
+  annotations: {}
+  hosts:
+    - host: dashlite.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+
+resources:
+   limits:
+     cpu: 100m
+     memory: 512Mi
+   requests:
+     cpu: 100m
+     memory: 512Mi
+
+#livenessProbe:
+#  httpGet:
+#    path: /health
+#    port: 9000
+#  initialDelaySeconds: 10
+#  periodSeconds: 10
+#
+#readinessProbe:
+#  httpGet:
+#    path: /health
+#    port: 9000
+#  initialDelaySeconds: 5
+#  periodSeconds: 10
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+
+postgres:
+  image: postgres:17
+  host: postgres
+  name: dashlite
+  username: user
+  password: password
+  port: 5432
+
+redis:
+  image: redis:8
+  host: redis
+  password: secret
+
+volumes: []
+
+volumeMounts: []
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
